@@ -1,3 +1,5 @@
+// list.h
+// Объявление структуры данных "Двусвязный список"
 #ifndef LIST_H_
 #define LIST_H_
 #include <stdio.h>
@@ -59,4 +61,5 @@ int			list_isEmpty( list* l);
 
 void        list_delNullNodes (list* l);
 
+int         list_check  (const list* l, void* controlData , int (*comp)(void *, void *));
 #endif /* LIST_H_ */

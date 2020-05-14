@@ -1,3 +1,5 @@
+// list.c
+// Реализация структуры данных "Двусвязный список"
 #include "list.h"
 #include <malloc.h>
 
@@ -246,7 +248,6 @@ list* list_search( list* l, void* controlData, int (*comp)(void *, void *), void
 		iter = node_getNext(iter);
 	}
 
-
 	return ansList;
 }
 
@@ -269,4 +270,16 @@ void        list_delNullNodes (list* l) {
         }
         node_delete(fNode);
     }
+}
+
+int         list_check  (const list* l, void* controlData , int (*comp)(void *, void *)) {
+    node* iter = l->first;
+    while (iter) {
+        if (!comp(controlData, iter->data)) {
+            return 1;
+        }
+        iter = node_getNext(iter);
+    }
+
+    return 0;
 }
