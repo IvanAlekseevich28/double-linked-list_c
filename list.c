@@ -1,7 +1,9 @@
-// list.c
-// Реализация структуры данных "Двусвязный список"
 #include "list.h"
+#include "string.h"
 #include <malloc.h>
+
+
+static int tagGenerator(char* buffer, char* rawTag, int isStart);
 
 node* node_create(void* data, unsigned dataSize) {
 	node* n = malloc(dataSize + sizeof(node*) * 2);
@@ -214,24 +216,61 @@ void* list_get( list* l, int pos) {
 	return 0;
 }
 
-int list_write(list* l, FILE* f, void (*dataWriter)(void *data, FILE* f)) {
+int list_write(list* l, FILE* f, void (*dataWriter)(void *data, FILE* f), char *tag) {
 	if (!f) {
 		return -1;
 	}
+
+    char startTag[128];
+    char endTag[128];
+
+    tagGenerator(startTag, tag, 1);
+    tagGenerator(endTag, tag, 0);
+    if (tag[0] != '\0')
+        fprintf(f, "%s\n", startTag);
+
 	node* iter = l->first;
 	while (iter) {
 		dataWriter(iter->data, f);
 		iter = node_getNext(iter);
 	}
+    if (tag[0] != '\0')
+        fprintf(f, "%s\n", endTag);
 
 	return 0;
 }
 
-int list_read(list* l, FILE* f, void* (*dataReader)(FILE *f)) {
+int list_read(list* l, FILE* f, void* (*dataReader)(FILE *f), char* tag) {
 	if (!f) {
 		return -1;
 	}
+
+    char startTag[128];
+    char endTag[128];
+
+    tagGenerator(startTag, tag, 1);
+    tagGenerator(endTag, tag, 0);
+
+
     while (!feof(f)) {
+        char command[128];
+        fscanf(f, "%s ", command);
+        if (strcmp(command, startTag) == 0) {
+            break;
+        }
+
+    }
+
+    while (!feof(f)) {
+        long pos = ftell(f);
+        char command[128];
+        fscanf(f, "%s ", command);
+        if (strcmp(command, endTag) != 0) {
+            fseek(f, pos, SEEK_SET);
+        } else {
+            break;
+        }
+
 		list_pushBack(l, dataReader(f));
 	}
 
@@ -247,6 +286,7 @@ list* list_search( list* l, void* controlData, int (*comp)(void *, void *), void
 		}
 		iter = node_getNext(iter);
 	}
+
 
 	return ansList;
 }
@@ -275,11 +315,23 @@ void        list_delNullNodes (list* l) {
 int         list_check  (const list* l, void* controlData , int (*comp)(void *, void *)) {
     node* iter = l->first;
     while (iter) {
-        if (!comp(controlData, iter->data)) {
+        if (comp(controlData, iter->data)) {
             return 1;
         }
         iter = node_getNext(iter);
     }
+
+    return 0;
+}
+
+static int tagGenerator(char* buffer, char* rawTag, int isStart) {
+    if (isStart) {
+        strcpy(buffer, "<");
+    } else {
+        strcpy(buffer, "</");
+    }
+    strcat(buffer, rawTag);
+    strcat(buffer, ">");
 
     return 0;
 }

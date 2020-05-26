@@ -1,5 +1,3 @@
-// list.h
-// Объявление структуры данных "Двусвязный список"
 #ifndef LIST_H_
 #define LIST_H_
 #include <stdio.h>
@@ -52,8 +50,8 @@ void		list_deletePos	(list* l, int   pos);
 unsigned	list_size( list* l);
 void*		list_get( list* l, int pos);
 
-int 		list_write	(list* l, FILE* f, void  (*dataWriter)(void *data, FILE* f));
-int 		list_read	(list* l, FILE* f, void* (*dataReader)(FILE *f));
+int 		list_write	(list* l, FILE* f, void  (*dataWriter)(void *data, FILE* f), char* tag);
+int 		list_read	(list* l, FILE* f, void* (*dataReader)(FILE *f), char *tag);
 
 list*		list_search	( list* l, void* controlData , int (*comp)(void *, void *), void* (*copy)(void*));
 
